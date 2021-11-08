@@ -76,28 +76,20 @@ logger = logging.getLogger(__name__)
 
 class SqueakController:
 
-    def __init__(
-        self,
-        squeak_db,
-        squeak_core,
-        payment_processor,
-        network_manager,
-        download_manager,
-        tweet_forwarder,
-        config,
-    ):
-        self.squeak_db = squeak_db
-        self.squeak_core = squeak_core
-        self.payment_processor = payment_processor
-        self.network_manager = network_manager
+    def __init__(self, squeak_node):
+        self.squeak_node = squeak_node
+        self.squeak_db = squeak_node.squeak_db
+        self.squeak_core = squeak_node.squeak_core
+        self.payment_processor = squeak_node.payment_processor
+        self.network_manager = squeak_node.network_manager
         self.new_squeak_listener = EventListener()
         self.new_received_offer_listener = EventListener()
         self.new_secret_key_listener = EventListener()
         self.new_follow_listener = EventListener()
         self.twitter_stream_change_listener = EventListener()
-        self.active_download_manager = download_manager
-        self.tweet_forwarder = tweet_forwarder
-        self.config = config
+        self.active_download_manager = squeak_node.download_manager
+        self.tweet_forwarder = squeak_node.twitter_forwarder
+        self.config = squeak_node.config
 
     def save_squeak(self, squeak: CSqueak) -> Optional[bytes]:
         # Check if the squeak is valid

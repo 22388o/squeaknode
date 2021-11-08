@@ -181,15 +181,7 @@ class SqueakNode:
         self.network_manager = NetworkManager(self.config)
 
     def initialize_squeak_controller(self):
-        self.squeak_controller = SqueakController(
-            self.squeak_db,
-            self.squeak_core,
-            self.payment_processor,
-            self.network_manager,
-            self.download_manager,
-            self.twitter_forwarder,
-            self.config,
-        )
+        self.squeak_controller = SqueakController(self)
 
     def initialize_admin_handler(self):
         self.admin_handler = SqueakAdminServerHandler(
