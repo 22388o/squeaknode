@@ -1,6 +1,6 @@
 {
-  "short_name": "Squeaknode",
-  "name": "Squeaknode is a frontend for accessing a squeak node",
+  "short_name": "React App",
+  "name": "Create React App Sample",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,8 +8,8 @@
       "type": "image/x-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
-  "theme_color": "#536DFE",
+  "theme_color": "#000000",
   "background_color": "#ffffff"
 }
