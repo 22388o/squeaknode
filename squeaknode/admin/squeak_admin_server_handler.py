@@ -1105,3 +1105,14 @@ class SqueakAdminServerHandler(object):
             twitter_account_id,
         )
         return squeak_admin_pb2.DeleteTwitterAccountReply()
+
+    def handle_get_seed_peers(self, request):
+        logger.info("Handle get seed peers")
+        squeak_peers = self.squeak_controller.get_seed_peers()
+        squeak_peer_msgs = [
+            squeak_peer_to_message(squeak_peer)
+            for squeak_peer in squeak_peers
+        ]
+        return squeak_admin_pb2.GetSeedPeersReply(
+            squeak_peers=squeak_peer_msgs,
+        )
