@@ -338,6 +338,10 @@ class SqueakController:
         saved_peer_manager = SavedPeerManager(self.squeak_db)
         return saved_peer_manager.get_saved_peer(peer_id)
 
+    def get_seed_peer(self, peer_name: str) -> Optional[SqueakPeer]:
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        return saved_peer_manager.get_seed_peer(peer_name)
+
     def get_peer_by_address(self, peer_address: PeerAddress) -> Optional[SqueakPeer]:
         # return self.squeak_db.get_peer_by_address(peer_address)
         saved_peer_manager = SavedPeerManager(self.squeak_db)
