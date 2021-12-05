@@ -110,6 +110,7 @@ def test_get_seed_peer(saved_peer_manager, default_seed_peers):
     peer = saved_peer_manager.get_seed_peer('squeakhub')
 
     assert peer == default_seed_peers[0]
+    assert peer.peer_id is None
 
 
 def test_get_seed_peer_none(saved_peer_manager):
