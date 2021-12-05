@@ -896,6 +896,16 @@ class SqueakDb:
                 return None
             return self._parse_squeak_peer(row)
 
+    def get_peer_by_name(self, name: str) -> Optional[SqueakPeer]:
+        """ Get a peer by name. """
+        s = select([self.peers]).where(self.peers.c.peer_name == name)
+        with self.get_connection() as connection:
+            result = connection.execute(s)
+            row = result.fetchone()
+            if row is None:
+                return None
+            return self._parse_squeak_peer(row)
+
     def get_peer_by_address(self, peer_address: PeerAddress) -> Optional[SqueakPeer]:
         """ Get a peer by address. """
         s = (
@@ -919,14 +929,14 @@ class SqueakDb:
             peers = [self._parse_squeak_peer(row) for row in rows]
             return peers
 
-    def get_autoconnect_peers(self) -> List[SqueakPeer]:
-        """ Get peers that are set to be autoconnect. """
-        s = select([self.peers]).where(self.peers.c.autoconnect)
-        with self.get_connection() as connection:
-            result = connection.execute(s)
-            rows = result.fetchall()
-            peers = [self._parse_squeak_peer(row) for row in rows]
-            return peers
+    # def get_autoconnect_peers(self) -> List[SqueakPeer]:
+    #     """ Get peers that are set to be autoconnect. """
+    #     s = select([self.peers]).where(self.peers.c.autoconnect)
+    #     with self.get_connection() as connection:
+    #         result = connection.execute(s)
+    #         rows = result.fetchall()
+    #         peers = [self._parse_squeak_peer(row) for row in rows]
+    #         return peers
 
     def set_peer_autoconnect(self, peer_id: int, autoconnect: bool):
         """ Set a peer is autoconnect. """
@@ -938,11 +948,31 @@ class SqueakDb:
         with self.get_connection() as connection:
             connection.execute(stmt)
 
+    def set_peer_autoconnect_by_name(self, peer_name: str, autoconnect: bool):
+        """ Set a peer is autoconnect by name. """
+        stmt = (
+            self.peers.update()
+            .where(self.peers.c.peer_name == peer_name)
+            .values(autoconnect=autoconnect)
+        )
+        with self.get_connection() as connection:
+            connection.execute(stmt)
+
     def set_peer_share_for_free(self, peer_id: int, share_for_free: bool):
         """ Set a peer is share_for_free. """
         stmt = (
             self.peers.update()
             .where(self.peers.c.peer_id == peer_id)
+            .values(share_for_free=share_for_free)
+        )
+        with self.get_connection() as connection:
+            connection.execute(stmt)
+
+    def set_peer_share_for_free_by_name(self, peer_name: str, share_for_free: bool):
+        """ Set a peer is share_for_free by name. """
+        stmt = (
+            self.peers.update()
+            .where(self.peers.c.peer_name == peer_name)
             .values(share_for_free=share_for_free)
         )
         with self.get_connection() as connection:

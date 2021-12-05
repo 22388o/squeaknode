@@ -43,7 +43,6 @@ from squeaknode.core.download_result import DownloadResult
 from squeaknode.core.lightning_address import LightningAddressHostPort
 from squeaknode.core.offer import Offer
 from squeaknode.core.peer_address import PeerAddress
-from squeaknode.core.peers import create_saved_peer
 from squeaknode.core.profiles import create_contact_profile
 from squeaknode.core.profiles import create_signing_profile
 from squeaknode.core.profiles import get_profile_private_key
@@ -68,6 +67,7 @@ from squeaknode.node.downloaded_object import DownloadedSqueak
 from squeaknode.node.listener_subscription_client import EventListener
 from squeaknode.node.price_policy import PricePolicy
 from squeaknode.node.received_payments_subscription_client import ReceivedPaymentsSubscriptionClient
+from squeaknode.node.saved_peer_manager import SavedPeerManager
 from squeaknode.node.secret_key_reply import FreeSecretKeyReply
 from squeaknode.node.secret_key_reply import OfferReply
 from squeaknode.node.secret_key_reply import SecretKeyReply
@@ -325,35 +325,50 @@ class SqueakController:
         return get_profile_private_key(profile)
 
     def create_peer(self, peer_name: str, peer_address: PeerAddress):
-        squeak_peer = create_saved_peer(
-            peer_name,
-            peer_address,
-        )
-        return self.squeak_db.insert_peer(squeak_peer)
+        # squeak_peer = create_saved_peer(
+        #     peer_name,
+        #     peer_address,
+        # )
+        # return self.squeak_db.insert_peer(squeak_peer)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        return saved_peer_manager.create_saved_peer(peer_name, peer_address)
 
     def get_peer(self, peer_id: int) -> Optional[SqueakPeer]:
-        return self.squeak_db.get_peer(peer_id)
+        # return self.squeak_db.get_peer(peer_id)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        return saved_peer_manager.get_saved_peer(peer_id)
 
     def get_peer_by_address(self, peer_address: PeerAddress) -> Optional[SqueakPeer]:
-        return self.squeak_db.get_peer_by_address(peer_address)
+        # return self.squeak_db.get_peer_by_address(peer_address)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        return saved_peer_manager.get_saved_peer_by_address(peer_address)
 
     def get_peers(self):
-        return self.squeak_db.get_peers()
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        return saved_peer_manager.get_saved_peers()
 
-    def get_autoconnect_peers(self) -> List[SqueakPeer]:
-        return self.squeak_db.get_autoconnect_peers()
+    # def get_autoconnect_peers(self) -> List[SqueakPeer]:
+    #     return self.squeak_db.get_autoconnect_peers()
 
     def set_peer_autoconnect(self, peer_id: int, autoconnect: bool):
-        self.squeak_db.set_peer_autoconnect(peer_id, autoconnect)
+        # self.squeak_db.set_peer_autoconnect(peer_id, autoconnect)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        saved_peer_manager.set_peer_autoconnect(peer_id, autoconnect)
 
     def set_peer_share_for_free(self, peer_id: int, share_for_free: bool):
-        self.squeak_db.set_peer_share_for_free(peer_id, share_for_free)
+        # self.squeak_db.set_peer_share_for_free(peer_id, share_for_free)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        saved_peer_manager.set_peer_share_for_free(peer_id, share_for_free)
 
     def rename_peer(self, peer_id: int, peer_name: str):
-        self.squeak_db.set_peer_name(peer_id, peer_name)
+        # self.squeak_db.set_peer_name(peer_id, peer_name)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        saved_peer_manager.rename_peer(peer_id, peer_name)
 
     def delete_peer(self, peer_id: int):
-        self.squeak_db.delete_peer(peer_id)
+        # self.squeak_db.delete_peer(peer_id)
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        saved_peer_manager.delete_peer(peer_id)
 
     def get_received_offers(self, squeak_hash: bytes) -> List[ReceivedOffer]:
         return self.squeak_db.get_received_offers(squeak_hash)
@@ -593,7 +608,8 @@ class SqueakController:
         self.network_manager.connect_peer_sync(peer_address)
 
     def connect_saved_peers(self) -> None:
-        peers = self.get_autoconnect_peers()
+        saved_peer_manager = SavedPeerManager(self.squeak_db)
+        peers = saved_peer_manager.get_autoconnect_peers()
         for peer in peers:
             self.network_manager.connect_peer_async(
                 peer.address,
