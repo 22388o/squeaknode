@@ -42,12 +42,13 @@ SEED_PEERS = {
 
 class SavedPeerManager:
 
-    def __init__(self, squeak_db: SqueakDb):
+    def __init__(self, squeak_db: SqueakDb, seed_peers_dict=SEED_PEERS):
         self.squeak_db = squeak_db
+        self.seed_peers_dict = seed_peers_dict
 
     @property
     def seed_peer_names(self):
-        return SEED_PEERS.keys()
+        return self.seed_peers_dict.keys()
 
     def create_saved_peer(self, peer_name: str, peer_address: PeerAddress):
         # TODO: Check if peer name or peer address is in seed peers config dict.
@@ -117,7 +118,7 @@ class SavedPeerManager:
         return SqueakPeer(
             peer_id=None,
             peer_name=peer_name,
-            address=SEED_PEERS[peer_name],
+            address=self.seed_peers_dict[peer_name],
             autoconnect=True,
             share_for_free=False,
         )
@@ -132,7 +133,7 @@ class SavedPeerManager:
 
     # def get_seed_peers(self) -> List[SeedPeer]:
     #     ret = []
-    #     for name, peer_address in SEED_PEERS.items():
+    #     for name, peer_address in self.seed_peers_dict.items():
     #         config = self.get_config(name)
     #         seed_peer = SeedPeer(
     #             peer_name=name,
