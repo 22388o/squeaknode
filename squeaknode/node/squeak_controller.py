@@ -60,13 +60,10 @@ from squeaknode.core.squeak_profile import SqueakProfile
 from squeaknode.core.squeaks import get_hash
 from squeaknode.core.twitter_account import TwitterAccount
 from squeaknode.core.twitter_account_entry import TwitterAccountEntry
-from squeaknode.core.update_subscriptions_event import UpdateSubscriptionsEvent
-from squeaknode.core.update_twitter_stream_event import UpdateTwitterStreamEvent
 from squeaknode.core.user_config import UserConfig
 from squeaknode.node.active_download_manager import ActiveDownload
 from squeaknode.node.downloaded_object import DownloadedOffer
 from squeaknode.node.downloaded_object import DownloadedSqueak
-from squeaknode.node.listener_subscription_client import EventListener
 from squeaknode.node.price_policy import PricePolicy
 from squeaknode.node.received_payments_subscription_client import ReceivedPaymentsSubscriptionClient
 from squeaknode.node.secret_key_reply import FreeSecretKeyReply
@@ -87,19 +84,21 @@ class SqueakController:
         network_manager,
         download_manager,
         tweet_forwarder,
+        node_event_listener,
         config,
     ):
         self.squeak_db = squeak_db
         self.squeak_core = squeak_core
         self.payment_processor = payment_processor
         self.network_manager = network_manager
-        self.new_squeak_listener = EventListener()
-        self.new_received_offer_listener = EventListener()
-        self.new_secret_key_listener = EventListener()
-        self.new_follow_listener = EventListener()
-        self.twitter_stream_change_listener = EventListener()
+        # self.new_squeak_listener = EventListener()
+        # self.new_received_offer_listener = EventListener()
+        # self.new_secret_key_listener = EventListener()
+        # self.new_follow_listener = EventListener()
+        # self.twitter_stream_change_listener = EventListener()
         self.active_download_manager = download_manager
         self.tweet_forwarder = tweet_forwarder
+        self.node_event_listener = node_event_listener
         self.config = config
 
     def save_squeak(self, squeak: CSqueak) -> Optional[bytes]:
@@ -121,7 +120,7 @@ class SqueakController:
             inserted_squeak_hash.hex(),
         ))
         # Notify the listener
-        self.new_squeak_listener.handle_new_item(squeak)
+        self.node_event_listener.handle_new_squeak(squeak)
         return inserted_squeak_hash
 
     def unlock_squeak(self, squeak_hash: bytes, secret_key: bytes):
@@ -139,7 +138,8 @@ class SqueakController:
             squeak_hash.hex(),
         ))
         # Notify the listener
-        self.new_secret_key_listener.handle_new_item(squeak)
+        # self.new_secret_key_listener.handle_new_item(squeak)
+        self.node_event_listener.handle_new_secret_key(squeak)
 
     def make_squeak(self, profile_id: int, content_str: str, replyto_hash: Optional[bytes]) -> Optional[bytes]:
         squeak_profile = self.squeak_db.get_profile(profile_id)
@@ -542,7 +542,7 @@ class SqueakController:
         logger.info("Saved received offer: {}".format(received_offer))
         received_offer = received_offer._replace(
             received_offer_id=received_offer_id)
-        self.new_received_offer_listener.handle_new_item(received_offer)
+        self.node_event_listener.handle_new_received_offer(received_offer)
         return received_offer_id
 
     # def get_followed_addresses(self) -> List[str]:
@@ -765,63 +765,76 @@ class SqueakController:
                 )
 
     def subscribe_new_squeaks(self, stopped: threading.Event):
-        yield from self.new_squeak_listener.yield_items(stopped)
+        # yield from self.new_squeak_listener.yield_items(stopped)
+        yield from self.node_event_listener.yield_new_squeaks(stopped)
 
     def subscribe_new_secret_keys(self, stopped: threading.Event):
-        yield from self.new_secret_key_listener.yield_items(stopped)
+        # yield from self.new_secret_key_listener.yield_items(stopped)
+        yield from self.node_event_listener.yield_new_secret_keys(stopped)
 
     def subscribe_follows(self, stopped: threading.Event):
-        yield from self.new_follow_listener.yield_items(stopped)
+        # yield from self.new_follow_listener.yield_items(stopped)
+        yield from self.node_event_listener.yield_new_follows(stopped)
 
     def subscribe_twitter_stream_changes(self, stopped: threading.Event):
-        yield from self.twitter_stream_change_listener.yield_items(stopped)
+        # yield from self.twitter_stream_change_listener.yield_items(stopped)
+        yield from self.node_event_listener.yield_new_twitter_stream(stopped)
 
     def update_subscriptions(self):
         locator = self.get_interested_locator()
         self.network_manager.update_local_subscriptions(locator)
 
     def create_update_subscriptions_event(self):
-        self.new_follow_listener.handle_new_item(UpdateSubscriptionsEvent())
+        # self.new_follow_listener.handle_new_item(UpdateSubscriptionsEvent())
+        self.node_event_listener.handle_new_follow()
 
     def create_update_twitter_stream_event(self):
-        self.twitter_stream_change_listener.handle_new_item(
-            UpdateTwitterStreamEvent()
-        )
+        # self.twitter_stream_change_listener.handle_new_item(
+        #     UpdateTwitterStreamEvent()
+        # )
+        self.node_event_listener.handle_new_twitter_stream()
 
     def subscribe_received_offers_for_squeak(self, squeak_hash: bytes, stopped: threading.Event):
-        for received_offer in self.new_received_offer_listener.yield_items(stopped):
+        # for received_offer in self.new_received_offer_listener.yield_items(stopped):
+        for received_offer in self.node_event_listener.yield_new_received_offers(stopped):
             if received_offer.squeak_hash == squeak_hash:
                 yield received_offer
 
     def subscribe_squeak_entry(self, squeak_hash: bytes, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             if squeak_hash == get_hash(item):
                 yield self.get_squeak_entry(squeak_hash)
 
     def subscribe_squeak_reply_entries(self, squeak_hash: bytes, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             if squeak_hash == item.hashReplySqk:
                 reply_hash = get_hash(item)
                 yield self.get_squeak_entry(reply_hash)
 
     def subscribe_squeak_public_key_entries(self, public_key: SqueakPublicKey, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             if public_key == item.GetPubKey():
                 squeak_hash = get_hash(item)
                 yield self.get_squeak_entry(squeak_hash)
 
     def subscribe_squeak_ancestor_entries(self, squeak_hash: bytes, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             if squeak_hash == get_hash(item):
                 yield self.get_ancestor_squeak_entries(squeak_hash)
 
     def subscribe_squeak_entries(self, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             squeak_hash = get_hash(item)
             yield self.get_squeak_entry(squeak_hash)
 
     def subscribe_timeline_squeak_entries(self, stopped: threading.Event):
-        for item in self.new_squeak_listener.yield_items(stopped):
+        # for item in self.new_squeak_listener.yield_items(stopped):
+        for item in self.node_event_listener.yield_new_squeaks(stopped):
             followed_public_keys = self.get_followed_public_keys()
             if item.GetPubKey() in set(followed_public_keys):
                 squeak_hash = get_hash(item)

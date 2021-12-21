@@ -36,6 +36,7 @@ from squeaknode.db.squeak_db import SqueakDb
 from squeaknode.lightning.lnd_lightning_client import LNDLightningClient
 from squeaknode.network.network_manager import NetworkManager
 from squeaknode.node.active_download_manager import ActiveDownloadManager
+from squeaknode.node.node_event_listener import NodeEventListener
 from squeaknode.node.payment_processor import PaymentProcessor
 from squeaknode.node.peer_connection_worker import PeerConnectionWorker
 from squeaknode.node.peer_subscription_update_worker import PeerSubscriptionUpdateWorker
@@ -67,6 +68,7 @@ class SqueakNode:
         self.initialize_squeak_core()
         self.initialize_payment_processor()
         self.initialize_twitter_forwarder()
+        self.initialize_node_event_listener()
         self.initialize_network_manager()
         self.initialize_download_manager()
         self.initialize_squeak_controller()
@@ -177,6 +179,9 @@ class SqueakNode:
             self.config.twitter.forward_tweets_retry_s,
         )
 
+    def initialize_node_event_listener(self):
+        self.node_event_listener = NodeEventListener()
+
     def initialize_network_manager(self):
         self.network_manager = NetworkManager(self.config)
 
@@ -188,6 +193,7 @@ class SqueakNode:
             self.network_manager,
             self.download_manager,
             self.twitter_forwarder,
+            self.node_event_listener,
             self.config,
         )
 
