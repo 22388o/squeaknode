@@ -1,14 +1,29 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
+import App from './App'
+import store from './app/store'
+import { Provider } from 'react-redux'
 
-//remove <React.StrictMode> <App /> </React.StrictMode> because it causes double renders on reducer
-ReactDOM.render( <App />, document.getElementById('root')
-);
+import { worker } from './api/server'
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+import { extendedApiSlice } from './features/users/usersSlice'
+
+// Wrap app rendering so we can wait for the mock API to initialize
+async function start() {
+  // Start our mock API server
+  await worker.start({ onUnhandledRequest: 'bypass' })
+
+  store.dispatch(extendedApiSlice.endpoints.getUsers.initiate())
+
+  ReactDOM.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+  )
+}
+
+start()
