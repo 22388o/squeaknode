@@ -1,91 +1,27 @@
-import React, { Suspense, lazy } from 'react'
-import { Route, Switch, HashRouter, Redirect, withRouter } from 'react-router-dom'
-import { StoreProvider } from './store/store'
-import 'dotenv/config'
-import './App.scss'
-import Loader from './components/Loader'
-import Nav from './components/Nav'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import Squeak from './components/Squeak'
-import Profiles from './components/Profiles'
-import Payments from './components/Payments'
-import Peers from './components/Peers'
-import Feed from './components/Feed'
-import Search from './components/Search'
-import Notifications from './components/Notifications'
-import Alerts from './components/Alerts'
+import React from 'react'
 
-const Home = lazy(() => import('./components/Home'))
-const Profile = lazy(() => import('./components/Profile'))
-const Peer = lazy(() => import('./components/Peer'))
-
-const DefaultContainer = withRouter(({ history }) => {
-  return (<div className="body-wrap">
-    <main className="main">
-      <div className={history.location.pathname.slice(0,9) !== '/messages' ? "middle-section ms-width" : "middle-section"}>
-        <Route path="/" exact>
-          <Redirect to="/app/home" />
-        </Route>
-        <Route path="/app/home" exact>
-          <Home />
-        </Route>
-        <Route path="/app/search" exact>
-          <Search />
-        </Route>
-        <Route path="/app/profile/:username" exact>
-          <Profile />
-        </Route>
-        <Route path="/app/peer/:network/:host/:port" exact>
-          <Peer />
-        </Route>
-        <Route path="/app/squeak/:id" exact>
-          <Squeak />
-        </Route>
-        <Route path="/app/profiles" exact>
-          <Profiles/>
-        </Route>
-        <Route path="/app/payments" exact>
-          <Payments/>
-        </Route>
-        <Route path="/app/peers" exact>
-          <Peers/>
-        </Route>
-        <Route path="/app/notifications" exact>
-          <Notifications/>
-        </Route>
-      </div>
-        {history.location.pathname.slice(0,9) !== '/messages' &&
-        <div className="right-section">
-          <Feed/>
-        </div>
-         }
-    </main>
-    <nav className="header">
-      <Nav />
-    </nav>
-  </div>)
-});
+import Header from './features/header/Header'
+import TodoList from './features/todos/TodoList'
+import Footer from './features/footer/Footer'
 
 function App() {
   return (
-    <div className="dark-mode">
-      <StoreProvider>
-        <HashRouter>
-          <Suspense fallback={<Loader />}>
-            <Alerts />
-            <Switch>
-              <Route path="/login" exact>
-                <Login />
-              </Route>
-              <Route path="/signup" exact>
-                <Signup />
-              </Route>
-              <Route component={DefaultContainer} />
-            </Switch>
-          </Suspense>
-        </HashRouter>
-      </StoreProvider>
+    <div className="App">
+      <nav>
+        <section>
+          <h1>Redux Fundamentals Example</h1>
+        </section>
+      </nav>
+      <main>
+        <section className="medium-container">
+          <h2>Todos</h2>
+          <div className="todoapp">
+            <Header />
+            <TodoList />
+            <Footer />
+          </div>
+        </section>
+      </main>
     </div>
   )
 }
