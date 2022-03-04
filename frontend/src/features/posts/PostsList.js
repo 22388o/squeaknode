@@ -11,7 +11,6 @@ import { useGetPostsQuery } from '../api/apiSlice'
 import { useGetTimelineSqueaksQuery } from '../api/apiSlice'
 
 let PostExcerpt = ({ squeak }) => {
-  console.log(squeak);
   return (
     <article className="post-excerpt" key={squeak.getSqueakHash()}>
       <h3>{squeak.getAuthor().getProfileName()}</h3>
@@ -34,12 +33,7 @@ export const PostsList = () => {
     error,
   } = useGetTimelineSqueaksQuery(5)
 
-  console.log(isLoading);
-  console.log(isSuccess);
-  console.log(isError);
-  console.log(squeaksResp);
   const squeaks = squeaksResp && squeaksResp.getSqueakDisplayEntriesList();
-  console.log(squeaks);
 
   // const sortedPosts = useMemo(() => {
   //   const sortedPosts = posts.slice()
@@ -52,7 +46,6 @@ export const PostsList = () => {
   if (isLoading) {
     content = <Spinner text="Loading..." />
   } else if (isSuccess) {
-    console.log(squeaks);
     const renderedSqueaks = squeaks.map((squeak) => (
       <PostExcerpt key={squeak.getSqueakHash()} squeak={squeak} />
     ))
