@@ -282,10 +282,10 @@ export const squeakApiSlice = createApi({
   endpoints(build) {
     return {
       getTimelineSqueaks: build.query({
-        query: () => {
+        query: (limit) => {
           console.log('Calling getTimelineSqueaks');
           const request = new GetTimelineSqueakDisplaysRequest();
-          request.setLimit(10);
+          request.setLimit(limit);
           const deser = GetTimelineSqueakDisplaysReply.deserializeBinary;
           return ({ url: '/gettimelinesqueakdisplays', req: request, deser: deser })
       } }),

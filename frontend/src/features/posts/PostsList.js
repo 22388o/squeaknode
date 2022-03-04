@@ -32,7 +32,7 @@ export const PostsList = () => {
     isSuccess,
     isError,
     error,
-  } = useGetTimelineSqueaksQuery()
+  } = useGetTimelineSqueaksQuery(5)
 
   console.log(isLoading);
   console.log(isSuccess);
