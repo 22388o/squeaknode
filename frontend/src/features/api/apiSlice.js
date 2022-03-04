@@ -295,7 +295,8 @@ export const squeakApiSlice = createApi({
             deser: deser,
             extract: (obj) => obj.getSqueakDisplayEntriesList(),
            })
-      } }),
+        },
+      }),
     }
   },
 })
