@@ -255,7 +255,7 @@ function makeRequest(route, request, deserializeMsg, handleResponse, handleError
 
 const axiosBaseQuery =
   ({ baseUrl } = { baseUrl: '' }) =>
-  async ({ url, req, deser }) => {
+  async ({ url, req, deser, extract }) => {
     try {
       const data = req.serializeBinary();
       const result = await axios({ url: baseUrl + url, responseType: 'arraybuffer', method: 'post', data })
@@ -263,8 +263,10 @@ const axiosBaseQuery =
       console.log(result.data);
       console.log(typeof(result.data));
       console.log(deser);
-      console.log(deser(result.data));
-      return { data: deser(result.data) }
+      const deserRes = deser(result.data);
+      console.log(deserRes);
+      const extracted = extract(deserRes);
+      return { data: extracted }
     } catch (axiosError) {
       let err = axiosError
       return {
@@ -287,7 +289,12 @@ export const squeakApiSlice = createApi({
           const request = new GetTimelineSqueakDisplaysRequest();
           request.setLimit(limit);
           const deser = GetTimelineSqueakDisplaysReply.deserializeBinary;
-          return ({ url: '/gettimelinesqueakdisplays', req: request, deser: deser })
+          return ({
+            url: '/gettimelinesqueakdisplays',
+            req: request,
+            deser: deser,
+            extract: (obj) => obj.getSqueakDisplayEntriesList(),
+           })
       } }),
     }
   },

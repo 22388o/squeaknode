@@ -25,21 +25,13 @@ let PostExcerpt = ({ squeak }) => {
 
 export const PostsList = () => {
   const {
-    data: squeaksResp = null,
+    data: squeaks = null,
     isLoading,
     isFetching,
     isSuccess,
     isError,
     error,
   } = useGetTimelineSqueaksQuery(5)
-
-  const squeaks = squeaksResp && squeaksResp.getSqueakDisplayEntriesList();
-
-  // const sortedPosts = useMemo(() => {
-  //   const sortedPosts = posts.slice()
-  //   sortedPosts.sort((a, b) => b.date.localeCompare(a.date))
-  //   return sortedPosts
-  // }, [posts])
 
   let content
 
