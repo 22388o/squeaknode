@@ -20,7 +20,7 @@ export const fetchTodos = createAsyncThunk('todos/fetchTodos', async () => {
   // const response = await client.get('/fakeApi/todos')
   const response = await getTimelineSqueaks(5);
   console.log(response);
-  return response
+  return response.getSqueakDisplayEntriesList();
 })
 
 export const saveNewTodo = createAsyncThunk(

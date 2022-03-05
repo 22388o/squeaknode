@@ -198,13 +198,12 @@ client.post = function (endpoint, body, customConfig = {}) {
 
 
 export const axiosBaseQuery =
-  async ({ url, req, deser, extract }) => {
+  async ({ url, req, deser }) => {
     try {
       const data = req.serializeBinary();
       const result = await axios({ url: web_host_port + url, responseType: 'arraybuffer', method: 'post', data })
       const deserRes = deser(result.data);
-      const extracted = extract(deserRes);
-      return extracted;
+      return deserRes;
     } catch (axiosError) {
       console.log('got error');
       console.log(axiosError);
