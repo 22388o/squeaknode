@@ -11,7 +11,7 @@ const todosAdapter = createEntityAdapter()
 
 const initialState = {
   status: 'idle',
-  entities: {}
+  entities: []
 }
 
 // Thunk functions
@@ -43,10 +43,10 @@ const todosSlice = createSlice({
     .addCase(fetchTodos.fulfilled, (state, action) => {
       console.log('Add case');
       console.log(action);
-      const newEntities = {}
-      action.payload.forEach(todo => {
-        newEntities[todo.getSqueakHash()] = todo
-      })
+      const newEntities = action.payload;
+      // action.payload.forEach(todo => {
+      //   newEntities[todo.getSqueakHash()] = todo
+      // })
       state.entities = newEntities
       state.status = 'idle'
     })
@@ -63,21 +63,19 @@ export default todosSlice.reducer
 
 export const selectTodoEntities = state => state.todos.entities
 
-export const selectTodos = createSelector(selectTodoEntities, entities =>
-  Object.values(entities)
-)
+export const selectTodos = createSelector(selectTodoEntities, entities => {
+  console.log(entities);
+  return entities
+})
 
 export const selectTodoIds = createSelector(
   // First, pass one or more "input selector" functions:
   selectTodos,
   // Then, an "output selector" that receives all the input results as arguments
   // and returns a final result value
-  todos => {
-    console.log(todos);
-    return todos.map(todo => todo.getSqueakHash())
-  }
+  todos => todos.map(todo => todo.getSqueakHash())
 )
 
 export const selectTodoById = (state, todoId) => {
-  return selectTodoEntities(state)[todoId]
+  return selectTodos(state).find(todo => todo.getSqueakHash() === todoId)
 }
