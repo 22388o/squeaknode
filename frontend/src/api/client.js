@@ -215,10 +215,11 @@ export const axiosBaseQuery =
   }
 
 
-export const getTimelineSqueaks = (limit) => {
+export const getTimelineSqueaks = (limit, lastSqueak) => {
     console.log('Calling getTimelineSqueaks');
     const request = new GetTimelineSqueakDisplaysRequest();
     request.setLimit(limit);
+    request.setLastEntry(lastSqueak);
     const deser = GetTimelineSqueakDisplaysReply.deserializeBinary;
     return axiosBaseQuery({
       url: '/gettimelinesqueakdisplays',

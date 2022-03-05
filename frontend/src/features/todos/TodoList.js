@@ -2,11 +2,16 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import TodoListItem from './TodoListItem'
 
-import { selectTodoIds } from './todosSlice'
+import { selectTodoIds, selectLastTodo } from './todosSlice'
+
+import { fetchTodos } from './todosSlice'
+import store from '../../store'
+
 
 const TodoList = () => {
   const todoIds = useSelector(selectTodoIds)
   const loadingStatus = useSelector((state) => state.todos.status)
+  const lastSqueak = useSelector(selectLastTodo)
 
   console.log(todoIds);
 
@@ -22,7 +27,12 @@ const TodoList = () => {
     return <TodoListItem key={todoId} id={todoId} />
   })
 
-  return <ul className="todo-list">{renderedListItems}</ul>
+  return <>
+          <ul className="todo-list">{renderedListItems}</ul>
+          <button onClick={() => store.dispatch(fetchTodos(lastSqueak))}>
+            LOAD MORE
+          </button>
+         </>
 }
 
 export default TodoList

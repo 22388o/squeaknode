@@ -15,13 +15,16 @@ const initialState = {
 }
 
 // Thunk functions
-export const fetchTodos = createAsyncThunk('todos/fetchTodos', async () => {
-  console.log('Fetching todos');
-  // const response = await client.get('/fakeApi/todos')
-  const response = await getTimelineSqueaks(5);
-  console.log(response);
-  return response.getSqueakDisplayEntriesList();
-})
+export const fetchTodos = createAsyncThunk(
+  'todos/fetchTodos',
+  async (lastSqueak) => {
+    console.log('Fetching todos');
+    // const response = await client.get('/fakeApi/todos')
+    const response = await getTimelineSqueaks(5, lastSqueak);
+    console.log(response);
+    return response.getSqueakDisplayEntriesList();
+  }
+)
 
 export const saveNewTodo = createAsyncThunk(
   'todos/saveNewTodo',
@@ -47,7 +50,7 @@ const todosSlice = createSlice({
       // action.payload.forEach(todo => {
       //   newEntities[todo.getSqueakHash()] = todo
       // })
-      state.entities = newEntities
+      state.entities = state.entities.concat(newEntities);
       state.status = 'idle'
     })
   },
@@ -67,6 +70,11 @@ export const selectTodos = createSelector(selectTodoEntities, entities => {
   console.log(entities);
   return entities
 })
+
+export const selectLastTodo = createSelector(
+  selectTodos,
+  todos => todos.length > 0 && todos[todos.length - 1]
+)
 
 export const selectTodoIds = createSelector(
   // First, pass one or more "input selector" functions:
