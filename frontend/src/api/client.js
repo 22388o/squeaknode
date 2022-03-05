@@ -225,6 +225,5 @@ export const getTimelineSqueaks = (limit, lastSqueak) => {
       url: '/gettimelinesqueakdisplays',
       req: request,
       deser: deser,
-      extract: (obj) => obj.getSqueakDisplayEntriesList(),
     });
 }
